@@ -49,6 +49,15 @@ export async function verifyClaim(claim: string): Promise<VerificationResponse> 
   // A label without an auditable citation must never be presented as supported.
   if (sources.length === 0) return noEvidenceResponse(claim);
 
+  const hasSupport = sources.some((source) => source.supports === "A_FAVOR");
+  const hasContradiction = sources.some((source) => source.supports === "EN_CONTRA");
+  if (
+    (assessment.verdict === "RESPALDADA" && !hasSupport) ||
+    (assessment.verdict === "CONTRADICHA" && !hasContradiction)
+  ) {
+    return noEvidenceResponse(claim);
+  }
+
   const limitations = assessment.limitations.length > 0 ? assessment.limitations : [];
   return {
     claim,

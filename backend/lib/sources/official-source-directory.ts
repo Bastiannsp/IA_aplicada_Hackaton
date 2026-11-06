@@ -94,7 +94,7 @@ export const OFFICIAL_SOURCE_DIRECTORY: readonly OfficialSourceReference[] = [
     id: "mintrab-40-horas",
     title: "Implementación de la Ley 40 Horas",
     publisher: "Ministerio del Trabajo y Previsión Social",
-    url: "https://www.mintrab.gob.cl/40horas/implementacion/",
+    url: "https://www.mintrab.gob.cl/40horas-implementacion/",
     description: "Orientación oficial sobre gradualidad y calendario de implementación.",
   },
   {

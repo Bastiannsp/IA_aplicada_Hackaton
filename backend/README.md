@@ -23,12 +23,11 @@ marcados como verificados en el expediente del equipo. El directorio es una list
 de fuentes posibles, no evidencia de una afirmación. Las sugerencias del expediente
 que se indicaban como pendientes de abrir no se incorporaron.
 
-`lib/sources/catalog.ts` contiene `VERIFICATION_SOURCE_CATALOG`, todavía vacío.
-Antes de la demo, el equipo debe agregar registros revisados con `id`, título,
-institución, URL HTTPS de uno de los dominios oficiales registrados, extracto
-textual copiado de la página o documento y palabras clave. No agregues enlaces
-sugeridos por el modelo. Solo los extractos del catálogo pueden aparecer como
-evidencia en la respuesta.
+`lib/sources/catalog.ts` contiene tres extractos iniciales revisados del BCN,
+Ministerio del Trabajo e INE. Antes de ampliar el catálogo, agrega registros
+revisados con `id`, título, institución, URL HTTPS del documento oficial, extracto
+trazable y palabras clave. No agregues enlaces sugeridos por el modelo. Solo los
+extractos del catálogo pueden aparecer como evidencia en la respuesta.
 
 La recuperación inicial compara palabras clave entre la afirmación y los metadatos
 y extractos del catálogo. No realiza búsquedas web abiertas ni demuestra por sí

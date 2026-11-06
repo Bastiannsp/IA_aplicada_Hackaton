@@ -19,9 +19,37 @@ export interface RetrievedEvidence extends CuratedSource {
   matchedKeywords: string[];
 }
 
-// Deliberately empty: no source material was included in the repository that
-// could be safely promoted to evidence without team review.
-export const VERIFICATION_SOURCE_CATALOG: readonly CuratedSource[] = [];
+// Initial reviewed records, cross-checked against the exact official documents.
+// Keep excerpts short and update them when the underlying page changes.
+export const VERIFICATION_SOURCE_CATALOG: readonly CuratedSource[] = [
+  {
+    id: "bcn-ley-21524-voto-obligatorio",
+    title: "Ley 21.524, restablece el voto obligatorio",
+    publisher: "Biblioteca del Congreso Nacional (LeyChile)",
+    url: "https://www.bcn.cl/leychile/navegar?i=1187324",
+    excerpt:
+      "El sufragio será obligatorio para los electores en todas las elecciones y plebiscitos, salvo en las elecciones primarias.",
+    keywords: ["voto", "sufragio", "obligatorio", "elecciones", "plebiscitos", "voluntario", "Ley 21.524"],
+  },
+  {
+    id: "mintrab-ley-40-horas",
+    title: "Implementación de la Ley 21.561, jornada de 40 horas",
+    publisher: "Ministerio del Trabajo y Previsión Social",
+    url: "https://www.mintrab.gob.cl/40horas-implementacion/",
+    excerpt:
+      "2024: reducción de jornada ordinaria a 44 horas. … 2026: reducción de jornada ordinaria a 42 horas. … 2028: reducción de jornada ordinaria a 40 horas.",
+    keywords: ["40 horas", "jornada", "laboral", "semanales", "gradual", "2024", "2026", "2028", "Ley 21.561"],
+  },
+  {
+    id: "ine-censo-2024-resultados",
+    title: "Primeros resultados del Censo 2024",
+    publisher: "Instituto Nacional de Estadísticas (INE)",
+    url: "https://www.ine.gob.cl/sala-de-prensa/prensa/general/noticia/2025/03/27/primeros-resultados-del-censo-2024-18.480.432-personas-fueron-censadas-en-chile-manteni%C3%A9ndose-la-tendencia-de-envejecimiento-de-la-poblaci%C3%B3n",
+    excerpt:
+      "Un total de 18.480.432 personas fueron censadas en Chile durante el Censo de Población y Vivienda.",
+    keywords: ["censo", "2024", "población", "personas", "habitantes", "mujeres", "hombres", "INE", "Chile"],
+  },
+];
 
 const OFFICIAL_HOSTS = new Set(
   OFFICIAL_SOURCE_DIRECTORY.map((source) => new URL(source.url).hostname.toLowerCase()),
@@ -115,7 +143,7 @@ export function retrieveEvidence(
       const matchedKeywords = [...claimTerms].filter((term) => indexedTerms.has(term));
       return { source, matchedKeywords };
     })
-    .filter(({ matchedKeywords }) => matchedKeywords.length > 0)
+    .filter(({ matchedKeywords }) => matchedKeywords.length >= 2)
     .sort((left, right) => right.matchedKeywords.length - left.matchedKeywords.length)
     .slice(0, limit)
     .map(({ source, matchedKeywords }) => ({ ...source, matchedKeywords }));

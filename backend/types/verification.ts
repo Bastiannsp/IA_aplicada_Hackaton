@@ -34,6 +34,19 @@ export interface VerificationResponse {
   human_review: true;
 }
 
+export interface CivicAskRequest {
+  documentId: string;
+  question: string;
+}
+
+export interface CivicAskResponse {
+  answer: string;
+  documentTitle: string;
+  officialUrl: string;
+  evidence: string | null;
+  foundInDocument: boolean;
+}
+
 export interface ApiErrorResponse {
   error: {
     code: string;
