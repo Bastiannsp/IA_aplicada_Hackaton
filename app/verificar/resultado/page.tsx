@@ -63,6 +63,7 @@ export default function ResultadoPage() {
         <section aria-live="polite" className={CARD}>
           <h2 className="text-base font-bold text-slate-600">Evaluación orientativa</h2>
           <div className="mt-2"><VerdictBadge verdict={verdict} large /></div>
+          <p className="mt-3 text-sm text-slate-600">Las fuentes y extractos provienen del catálogo oficial revisado. La síntesis y clasificación son una orientación generada por Clara.</p>
           <h2 className="mt-5 text-2xl font-bold">Explicación</h2>
           <ol className="mt-3 space-y-3">
             {explanation.map((line, index) => (

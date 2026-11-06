@@ -60,6 +60,8 @@ OPENROUTER_MODEL=deepseek/deepseek-chat
 
 No subir `.env.local` ni tokens al repositorio.
 
+La evidencia de cumplimiento ético y los puntos pendientes para la presentación están documentados en [docs/ETICA.md](docs/ETICA.md).
+
 ## Alcance actual
 
 El proyecto está preparado como sitio web responsive. La información de demostración se enfoca en Chile y las fuentes deben mantenerse actualizadas y revisadas antes de usar la aplicación en producción.

@@ -6,9 +6,9 @@ import { reels } from '@/data/mockData';
 
 export default function ReelsPage() {
   return (
-    <div className="mx-auto h-[calc(100dvh-4.5rem)] w-full max-w-6xl snap-y snap-mandatory overflow-y-scroll bg-black" aria-label="Noticias verificadas en formato corto">
+    <div className="mx-auto h-[calc(100dvh-4.5rem)] w-full max-w-6xl snap-y snap-mandatory overscroll-y-contain overflow-y-scroll bg-black [scrollbar-width:none]" aria-label="Noticias verificadas en formato corto">
       {reels.map((r) => (
-        <article key={r.id} className={`relative flex h-[calc(100dvh-4.5rem)] snap-start flex-col justify-between bg-gradient-to-b ${r.gradient} text-white`}>
+        <article key={r.id} className={`relative flex h-[calc(100dvh-4.5rem)] snap-always snap-start touch-pan-y flex-col justify-between bg-gradient-to-b ${r.gradient} text-white`}>
           <header className="flex items-center justify-between gap-2 p-4">
             <span className="rounded-full bg-white/20 px-3 py-1 text-base font-bold">{r.category}</span>
             <VerdictBadge verdict={r.verdict} />

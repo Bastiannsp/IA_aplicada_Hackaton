@@ -7,6 +7,7 @@ export const runtime = "nodejs";
 const MAX_CLAIM_LENGTH = 2_000;
 const MIN_CLAIM_LENGTH = 10;
 const MAX_REQUEST_BYTES = 16_384;
+const POLITICAL_QUERY_PATTERN = /\b(vota|votar|apoya|apoyar|elige|elegir|campaña|propaganda|partidista|partido político|presidente|presidenta|diputado|diputada|senador|senadora|alcalde|alcaldesa|ministro|ministra|candidato|candidata)\b/i;
 
 function apiError(status: number, code: string, message: string): Response {
   const body: ApiErrorResponse = { error: { code, message } };
@@ -72,6 +73,9 @@ export async function POST(request: Request): Promise<Response> {
   }
   if (claim.length > MAX_CLAIM_LENGTH) {
     return apiError(413, "CLAIM_TOO_LONG", `La afirmación no puede superar ${MAX_CLAIM_LENGTH} caracteres.`);
+  }
+  if (POLITICAL_QUERY_PATTERN.test(claim)) {
+    return apiError(422, "POLITICAL_QUERY_NOT_SUPPORTED", "Clara no genera propaganda ni evalúa consultas sobre personas en cargos públicos. Puedes consultar leyes, políticas públicas y fuentes oficiales sin pedir apoyo político.");
   }
 
   try {

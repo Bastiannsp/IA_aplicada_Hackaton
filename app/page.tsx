@@ -24,8 +24,8 @@ export default function Home() {
 
       <div className="mx-auto max-w-5xl space-y-4 px-5 pt-5 sm:px-8 lg:px-12">
         <aside className="rounded-2xl border border-[#C8102E]/40 bg-red-50 px-3 py-2 text-sm leading-snug text-red-950 shadow-sm">
-          <strong className="text-[#C8102E]">Uso responsable de Clara.</strong> Clara apoya la evaluación de
-          información, pero no reemplaza el criterio humano ni emite veredictos absolutos.
+          <strong className="text-[#C8102E]">Uso responsable de Clara.</strong> Clara es una asistente de
+          inteligencia artificial: apoya la evaluación de información, pero no reemplaza el criterio humano ni emite veredictos absolutos.
         </aside>
 
         <ListenButton text={SUMMARY} id="home" label="Escuchar resumen por voz" className="w-full" />

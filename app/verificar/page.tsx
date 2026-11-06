@@ -1,7 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Search } from 'lucide-react';
+import { Loader2, Search, X } from 'lucide-react';
 import { useVerification } from '@/components/VerificationProvider';
 
 type Phase = 'form' | 'loading';
@@ -12,17 +12,21 @@ export default function VerificarPage() {
   const [claim, setClaim] = useState('');
   const [phase, setPhase] = useState<Phase>('form');
   const [error, setError] = useState('');
+  const requestRef = useRef<AbortController | null>(null);
 
   const submit = async () => {
     const normalizedClaim = claim.trim();
     if (!normalizedClaim || phase === 'loading') return;
     setError('');
     setPhase('loading');
+    const controller = new AbortController();
+    requestRef.current = controller;
     try {
       const response = await fetch('/api/verify/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ claim: normalizedClaim }),
+        signal: controller.signal,
       });
       const payload: unknown = await response.json().catch(() => null);
 
@@ -46,9 +50,18 @@ export default function VerificarPage() {
       setResult(payload as import('@/backend/types/verification').VerificationResponse);
       router.push('/verificar/resultado');
     } catch (submitError) {
+      if (controller.signal.aborted) return;
       setError(submitError instanceof Error ? submitError.message : 'Ocurrió un error inesperado.');
       setPhase('form');
+    } finally {
+      if (requestRef.current === controller) requestRef.current = null;
     }
+  };
+
+  const cancel = () => {
+    requestRef.current?.abort();
+    requestRef.current = null;
+    setPhase('form');
   };
 
   return (
@@ -70,6 +83,11 @@ export default function VerificarPage() {
           {phase === 'loading' ? 'Clara está verificando...' : 'Comprobar con Clara'}
         </button>
         {phase === 'loading' && <p role="status" aria-live="polite" className="text-center text-base font-bold text-[#0B3D91]">Contrastando la afirmación con fuentes revisadas...</p>}
+        {phase === 'loading' && (
+          <button type="button" onClick={cancel} className="mx-auto inline-flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-slate-400 bg-white px-5 text-base font-bold text-slate-700">
+            <X className="h-5 w-5" aria-hidden /> Cancelar verificación
+          </button>
+        )}
       </div>
     </div>
   );
