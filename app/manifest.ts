@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+export const dynamic = 'force-static';
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Ciudadanía Clara', short_name: 'Ciudadanía', start_url: '/', display: 'standalone',

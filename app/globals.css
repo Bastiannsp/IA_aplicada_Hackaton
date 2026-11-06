@@ -1,4 +1,19 @@
 @import "tailwindcss";
 
-body { background: #F5F6F8; color: #14213D; font-size: 18px; line-height: 1.55; }
-@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+body {
+  background: #F5F6F8;
+  color: #14213D;
+  font-size: 18px;
+  line-height: 1.55;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Foco visible global para teclado y lectores de pantalla */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 4px solid #C8102E;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

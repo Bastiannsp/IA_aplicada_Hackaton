@@ -1,0 +1,571 @@
+﻿
+===== types/index.ts =====
+
+export type Verdict = 'RESPALDADA' | 'CONTRADICHA' | 'ENGAÃ‘OSA' | 'NO_VERIFICABLE';
+export type SourceRelation = 'A favor' | 'En contra' | 'Contexto';
+
+export interface OfficialSource {
+  id: string;
+  headline: string;
+  institution: string;
+  excerpt: string;
+  url: string;
+  relation: SourceRelation;
+}
+
+export interface VerificationResult {
+  id: string;
+  claim: string;
+  keywords: string[];
+  verdict: Verdict;
+  explanation: [string, string, string];
+  sources: OfficialSource[];
+  limitations: string[];
+}
+
+export interface Reel {
+  id: string;
+  category: string;
+  verdict: Verdict;
+  headline: string;
+  summary: string;
+  sourceLabel: string;
+  sourceUrl: string;
+  emoji: string;
+  gradient: string; // clases Tailwind de fondo
+}
+
+export interface CaseItem {
+  id: string;
+  title: string;
+  type: 'Proyecto de Ley' | 'Presupuesto Municipal' | 'Noticia';
+  headline: string; // lo que "dice la noticia"
+  resultId: string; // id de VerificationResult
+}
+export type PriorVote = 'Verdadero' | 'Falso' | 'No sÃ©';
+
+export interface Lesson {
+  id: string;
+  title: string;
+  body: string;
+  quiz: { question: string; options: string[]; correctIndex: number; feedback: string };
+}
+
+export interface CivicDocument {
+  id: string;
+  title: string;
+  institution: string;
+  qa: { keywords: string[]; answer: string; citation: { ref: string; quote: string } }[];
+}
+
+
+===== data/mockData.ts =====
+
+import type { CaseItem, CivicDocument, Lesson, Reel, VerificationResult } from '@/types';
+
+/* âš ï¸ DATOS SINTÃ‰TICOS DE DEMOSTRACIÃ“N. Funciona 100% offline.
+   Antes de producciÃ³n, reemplazar por consultas a fuentes reales (BCN, DirecciÃ³n del Trabajo, etc.). */
+
+export const verifications: VerificationResult[] = [
+  {
+    id: 'jornada-40h',
+    claim: 'La jornada laboral de 40 horas ya rige para todos los trabajadores desde 2024.',
+    keywords: ['40 horas', 'jornada', 'semana laboral', 'horas'],
+    verdict: 'ENGAÃ‘OSA',
+    explanation: [
+      'La Ley 40 Horas existe, pero reduce la jornada de forma gradual.',
+      'En 2024 la jornada bajÃ³ a 44 horas, no a 40.',
+      'Las 40 horas se alcanzan reciÃ©n en 2028, segÃºn el calendario de la ley.',
+    ],
+    sources: [
+      { id: 's1', headline: 'Ley 40 Horas: gradualidad de la reducciÃ³n', institution: 'DirecciÃ³n del Trabajo', excerpt: 'La jornada ordinaria se reduce de manera progresiva hasta alcanzar las 40 horas semanales.', url: 'https://www.dt.gob.cl', relation: 'En contra' },
+      { id: 's2', headline: 'Texto de la ley sobre jornada de trabajo', institution: 'Biblioteca del Congreso Nacional', excerpt: 'Establece una disminuciÃ³n escalonada de la jornada mÃ¡xima en distintos plazos.', url: 'https://www.bcn.cl/leychile', relation: 'Contexto' },
+    ],
+    limitations: [
+      'No evalÃºa jornadas especiales ni convenios colectivos particulares.',
+      'Las fechas exactas deben confirmarse en el texto vigente de la ley.',
+    ],
+  },
+  {
+    id: 'pgu',
+    claim: 'La PensiÃ³n Garantizada Universal solo la reciben quienes nunca cotizaron.',
+    keywords: ['pgu', 'pensiÃ³n garantizada', 'pension garantizada', 'cotizaron', 'pensiÃ³n'],
+    verdict: 'CONTRADICHA',
+    explanation: [
+      'La PGU no exige haber estado sin cotizar.',
+      'TambiÃ©n pueden recibirla personas que sÃ­ tienen pensiÃ³n, si cumplen los requisitos.',
+      'Los requisitos dependen de la edad y de la situaciÃ³n socioeconÃ³mica del hogar.',
+    ],
+    sources: [
+      { id: 's3', headline: 'PensiÃ³n Garantizada Universal: requisitos', institution: 'ChileAtiende', excerpt: 'Beneficio para personas mayores que cumplen requisitos de edad, residencia y focalizaciÃ³n.', url: 'https://www.chileatiende.gob.cl', relation: 'En contra' },
+      { id: 's4', headline: 'Ley que crea la PGU', institution: 'Biblioteca del Congreso Nacional', excerpt: 'Regula el beneficio sin exigir la ausencia total de cotizaciones.', url: 'https://www.bcn.cl/leychile', relation: 'En contra' },
+    ],
+    limitations: [
+      'No calcula el monto exacto para un caso personal.',
+      'Los montos se reajustan; revisa el valor vigente en la fuente oficial.',
+    ],
+  },
+  {
+    id: 'presupuesto-municipal',
+    claim: 'El municipio destinarÃ¡ la mitad de su presupuesto 2026 a seguridad.',
+    keywords: ['presupuesto', 'municipal', 'municipio', 'seguridad', 'mitad'],
+    verdict: 'NO_VERIFICABLE',
+    explanation: [
+      'No encontramos un documento oficial que indique ese porcentaje.',
+      'El presupuesto de demostraciÃ³n distribuye montos por programa, sin una cifra global para seguridad.',
+      'Sin la fuente original, no es posible confirmar ni desmentir.',
+    ],
+    sources: [
+      { id: 's5', headline: 'Presupuesto Municipal 2026 (demo)', institution: 'Municipalidad (documento de demostraciÃ³n)', excerpt: 'El documento detalla programas por Ã¡rea, sin un porcentaje total para seguridad.', url: 'https://www.subdere.gov.cl', relation: 'Contexto' },
+    ],
+    limitations: [
+      'Solo se revisÃ³ el documento de demostraciÃ³n cargado.',
+      'Puede existir informaciÃ³n en actas o modificaciones presupuestarias no incluidas.',
+    ],
+  },
+];
+
+const NO_EVIDENCE: VerificationResult = {
+  id: 'sin-evidencia',
+  claim: '',
+  keywords: [],
+  verdict: 'NO_VERIFICABLE',
+  explanation: [
+    'No encontramos evidencia oficial para esta afirmaciÃ³n en la base de demostraciÃ³n.',
+    'Eso no significa que sea verdadera ni falsa.',
+    'Te recomendamos revisar fuentes institucionales directamente.',
+  ],
+  sources: [],
+  limitations: ['Esta demo solo contiene 3 casos precargados.', 'La IA no puede verificar hechos sin fuentes oficiales.'],
+};
+
+export function findVerification(claim: string): VerificationResult {
+  const q = claim.toLowerCase();
+  const scored = verifications
+    .map((v) => ({ v, score: v.keywords.filter((k) => q.includes(k)).length }))
+    .sort((a, b) => b.score - a.score);
+  const best = scored[0];
+  if (best && best.score > 0) return { ...best.v, claim: claim.trim() || best.v.claim };
+  return { ...NO_EVIDENCE, claim: claim.trim() };
+}
+
+export const reels: Reel[] = [
+  { id: 'r1', category: 'Trabajo', verdict: 'ENGAÃ‘OSA', emoji: 'â±ï¸', gradient: 'from-[#0B3D91] to-[#14213D]',
+    headline: 'Las 40 horas llegan en etapas, no de golpe',
+    summary: 'La reducciÃ³n de jornada es gradual: 44 horas en 2024 y 40 horas reciÃ©n en 2028.',
+    sourceLabel: 'DirecciÃ³n del Trabajo', sourceUrl: 'https://www.dt.gob.cl' },
+  { id: 'r2', category: 'Pensiones', verdict: 'CONTRADICHA', emoji: 'ðŸ‘µ', gradient: 'from-[#7A1022] to-[#14213D]',
+    headline: 'La PGU no es solo para quienes no cotizaron',
+    summary: 'Personas con pensiÃ³n tambiÃ©n pueden recibirla si cumplen los requisitos de la ley.',
+    sourceLabel: 'ChileAtiende', sourceUrl: 'https://www.chileatiende.gob.cl' },
+  { id: 'r3', category: 'Municipal', verdict: 'NO_VERIFICABLE', emoji: 'ðŸ›ï¸', gradient: 'from-[#2F4858] to-[#14213D]',
+    headline: 'Â¿Mitad del presupuesto en seguridad? No hay datos',
+    summary: 'El documento oficial de demostraciÃ³n no confirma ese porcentaje. Pide la fuente original.',
+    sourceLabel: 'Presupuesto Municipal (demo)', sourceUrl: 'https://www.subdere.gov.cl' },
+];
+
+export const cases: CaseItem[] = [
+  { id: 'c1', title: 'Ley 40 Horas', type: 'Proyecto de Ley', headline: 'Ya trabajamos 40 horas en todo Chile desde 2024.', resultId: 'jornada-40h' },
+  { id: 'c2', title: 'PensiÃ³n Garantizada Universal', type: 'Noticia', headline: 'La PGU solo es para quienes nunca cotizaron.', resultId: 'pgu' },
+  { id: 'c3', title: 'Presupuesto municipal 2026', type: 'Presupuesto Municipal', headline: 'La mitad del presupuesto irÃ¡ a seguridad.', resultId: 'presupuesto-municipal' },
+];
+
+export const lessons: Lesson[] = [
+  { id: 'l1', title: 'CÃ³mo detectar un titular engaÃ±oso',
+    body: 'Un titular engaÃ±oso suele exagerar, omitir fechas o mezclar hechos con opiniones. Antes de compartir, lee la noticia completa, revisa la fecha y busca quiÃ©n lo afirma.',
+    quiz: { question: 'Â¿QuÃ© es lo primero que conviene hacer ante un titular que te indigna?', options: ['Compartirlo rÃ¡pido', 'Leer la noticia completa y revisar la fecha', 'Comentar sin leer', 'Confiar si tiene muchos likes'], correctIndex: 1, feedback: 'Los titulares buscan emociÃ³n. El contexto completo y la fecha cambian el sentido.' } },
+  { id: 'l2', title: 'Identificar fuentes oficiales',
+    body: 'Una fuente oficial pertenece a una instituciÃ³n pÃºblica: ministerios, la Biblioteca del Congreso, municipalidades. Revisa que la direcciÃ³n web termine en .cl o .gob.cl y que cite el documento original.',
+    quiz: { question: 'Â¿CuÃ¡l es una fuente oficial?', options: ['Una cadena de WhatsApp', 'Un sitio .gob.cl de un ministerio', 'Una captura sin fecha', 'Un video anÃ³nimo'], correctIndex: 1, feedback: 'Los sitios gob.cl pertenecen a instituciones del Estado y publican documentos verificables.' } },
+  { id: 'l3', title: 'Leer una ley sin perderse',
+    body: 'Las leyes se ordenan en artÃ­culos. Busca primero el tÃ­tulo, luego el artÃ­culo que responde tu duda y fÃ­jate en artÃ­culos transitorios: ahÃ­ suelen estar los plazos.',
+    quiz: { question: 'Â¿DÃ³nde suelen estar los plazos de entrada en vigencia?', options: ['En el tÃ­tulo', 'En los artÃ­culos transitorios', 'En la firma', 'No existen'], correctIndex: 1, feedback: 'Los artÃ­culos transitorios regulan plazos y gradualidad, como en la Ley 40 Horas.' } },
+];
+
+export const documents: CivicDocument[] = [
+  { id: 'd1', title: 'Ley de Presupuesto Municipal 2026 (demo)', institution: 'Municipalidad (texto de demostraciÃ³n)',
+    qa: [
+      { keywords: ['seguridad', 'cÃ¡maras', 'patrulla'], answer: 'Se destinan fondos a seguridad ciudadana, pero el documento no indica que sea la mitad del presupuesto.', citation: { ref: 'Art. 4Â°, p. 3', quote: 'Se asignan recursos al programa de seguridad ciudadana conforme al detalle del anexo I.' } },
+      { keywords: ['Ã¡reas verdes', 'plaza', 'parque'], answer: 'Hay una partida para mantenciÃ³n de Ã¡reas verdes y plazas.', citation: { ref: 'Art. 6Â°, p. 4', quote: 'Se financiarÃ¡ la mantenciÃ³n de Ã¡reas verdes y espacios pÃºblicos comunales.' } },
+      { keywords: ['aprobar', 'concejo', 'quiÃ©n'], answer: 'El presupuesto debe ser aprobado por el Concejo Municipal.', citation: { ref: 'Art. 1Â°, p. 1', quote: 'El presente presupuesto serÃ¡ sometido a la aprobaciÃ³n del Concejo Municipal.' } },
+    ] },
+  { id: 'd2', title: 'Proyecto de Ley X â€“ Jornada laboral (demo)', institution: 'Congreso Nacional (texto de demostraciÃ³n)',
+    qa: [
+      { keywords: ['40', 'horas', 'cuÃ¡ndo', 'plazo'], answer: 'La jornada baja por etapas y llega a 40 horas en 2028.', citation: { ref: 'Art. 1Â° transitorio, p. 7', quote: 'La reducciÃ³n de jornada se aplicarÃ¡ de forma gradual en los plazos que se indican.' } },
+      { keywords: ['sueldo', 'salario', 'rebaja'], answer: 'El texto indica que la reducciÃ³n de jornada no puede significar una rebaja de remuneraciones.', citation: { ref: 'Art. 2Â°, p. 2', quote: 'La disminuciÃ³n de la jornada no afectarÃ¡ las remuneraciones pactadas.' } },
+    ] },
+];
+
+
+===== hooks/useVoice.ts =====
+
+'use client';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export function useVoice(lang = 'es-CL') {
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const [listening, setListening] = useState(false);
+  const [ttsSupported, setTtsSupported] = useState(false);
+  const [sttSupported, setSttSupported] = useState(false);
+  const recRef = useRef<any>(null);
+
+  useEffect(() => {
+    setTtsSupported('speechSynthesis' in window);
+    setSttSupported('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
+    return () => {
+      window.speechSynthesis?.cancel();
+      recRef.current?.abort?.();
+    };
+  }, []);
+
+  const stop = useCallback(() => {
+    window.speechSynthesis?.cancel();
+    setSpeakingId(null);
+  }, []);
+
+  const speak = useCallback(
+    (text: string, id = 'default') => {
+      if (!('speechSynthesis' in window) || !text) return;
+      window.speechSynthesis.cancel(); // evita cola de audios
+      const u = new SpeechSynthesisUtterance(text);
+      const voices = window.speechSynthesis.getVoices();
+      const voice =
+        voices.find((v) => v.lang === 'es-CL') ||
+        voices.find((v) => v.lang.startsWith('es')) ||
+        null;
+      if (voice) u.voice = voice;
+      u.lang = voice?.lang ?? lang;
+      u.rate = 0.9; // ritmo pausado para adulto mayor
+      u.onend = () => setSpeakingId(null);
+      u.onerror = () => setSpeakingId(null);
+      setSpeakingId(id);
+      window.speechSynthesis.speak(u);
+    },
+    [lang],
+  );
+
+  /** Alterna entre "Escuchar" y "Detener audio" para un mismo id. */
+  const toggle = useCallback(
+    (text: string, id = 'default') => (speakingId === id ? stop() : speak(text, id)),
+    [speakingId, speak, stop],
+  );
+
+  const listen = useCallback(
+    (onResult: (transcript: string) => void) => {
+      const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (!SR) return;
+      if (listening) {
+        recRef.current?.stop();
+        return;
+      }
+      const rec = new SR();
+      rec.lang = lang;
+      rec.interimResults = false;
+      rec.maxAlternatives = 1;
+      rec.onresult = (e: any) => onResult(e.results[0][0].transcript);
+      rec.onend = () => setListening(false);
+      rec.onerror = () => setListening(false);
+      recRef.current = rec;
+      setListening(true);
+      rec.start();
+    },
+    [lang, listening],
+  );
+
+  return { speak, stop, toggle, speakingId, isSpeaking: speakingId !== null, listen, listening, ttsSupported, sttSupported };
+}
+
+
+===== components/ListenButton.tsx =====
+
+'use client';
+import { Square } from 'lucide-react';
+import { useVoice } from '@/hooks/useVoice';
+
+interface Props { text: string; id: string; label?: string; className?: string }
+
+export default function ListenButton({ text, id, label = 'Escuchar', className = '' }: Props) {
+  const { toggle, speakingId, ttsSupported } = useVoice();
+  const active = speakingId === id;
+  if (!ttsSupported) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => toggle(text, id)}
+      aria-pressed={active}
+      className={`inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl px-5 text-lg font-bold focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#C8102E] ${
+        active ? 'bg-[#C8102E] text-white' : 'bg-[#0B3D91] text-white'
+      } ${className}`}
+    >
+      {active ? <><Square className="h-5 w-5" aria-hidden /> Detener audio</> : `ðŸ”Š ${label}`}
+    </button>
+  );
+}
+
+
+===== components/VerdictBadge.tsx =====
+
+import { AlertTriangle, CheckCircle2, HelpCircle, XCircle } from 'lucide-react';
+import type { Verdict } from '@/types';
+
+const STYLES: Record<Verdict, { label: string; cls: string; Icon: typeof XCircle }> = {
+  RESPALDADA: { label: 'Respaldada', cls: 'bg-emerald-100 text-emerald-900 border-emerald-700', Icon: CheckCircle2 },
+  CONTRADICHA: { label: 'Contradicha', cls: 'bg-red-100 text-red-900 border-red-700', Icon: XCircle },
+  ENGAÃ‘OSA: { label: 'EngaÃ±osa', cls: 'bg-amber-100 text-amber-900 border-amber-700', Icon: AlertTriangle },
+  NO_VERIFICABLE: { label: 'No verificable', cls: 'bg-slate-100 text-slate-800 border-slate-600', Icon: HelpCircle },
+};
+
+export default function VerdictBadge({ verdict, large = false }: { verdict: Verdict; large?: boolean }) {
+  const { label, cls, Icon } = STYLES[verdict];
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full border-2 font-bold ${cls} ${large ? 'px-4 py-2 text-lg' : 'px-3 py-1 text-sm'}`}>
+      <Icon className={large ? 'h-6 w-6' : 'h-4 w-4'} aria-hidden /> {label}
+    </span>
+  );
+}
+
+
+===== components/BottomNav.tsx =====
+
+'use client';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Clapperboard, Compass, GraduationCap, Home, ShieldCheck } from 'lucide-react';
+
+const TABS = [
+  { href: '/', label: 'Inicio', Icon: Home },
+  { href: '/verificar', label: 'Verificar', Icon: ShieldCheck },
+  { href: '/reels', label: 'Reels', Icon: Clapperboard },
+  { href: '/explorar', label: 'Explorar', Icon: Compass },
+  { href: '/aprender', label: 'Aprender', Icon: GraduationCap },
+];
+
+export default function BottomNav() {
+  const path = usePathname();
+  return (
+    <nav aria-label="NavegaciÃ³n principal" className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-300 bg-white pb-[env(safe-area-inset-bottom)]">
+      <ul className="mx-auto flex h-[4.5rem] max-w-3xl">
+        {TABS.map(({ href, label, Icon }) => {
+          const active = href === '/' ? path === '/' : path.startsWith(href);
+          return (
+            <li key={href} className="flex-1">
+              <Link href={href} aria-current={active ? 'page' : undefined}
+                className={`flex h-full flex-col items-center justify-center gap-1 text-xs font-bold ${active ? 'text-[#0B3D91]' : 'text-slate-600'}`}>
+                <span className={`rounded-full px-5 py-1 ${active ? 'bg-[#0B3D91]/10' : ''}`}><Icon className="h-6 w-6" aria-hidden /></span>
+                {label}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
+
+
+===== app/layout.tsx =====
+
+import type { Metadata, Viewport } from 'next';
+import { Atkinson_Hyperlegible } from 'next/font/google';
+import BottomNav from '@/components/BottomNav';
+import './globals.css';
+
+const font = Atkinson_Hyperlegible({ subsets: ['latin'], weight: ['400', '700'], display: 'swap' });
+
+export const metadata: Metadata = {
+  title: 'CiudadanÃ­a Clara',
+  description: 'Verifica, entiende y aprende con fuentes claras',
+};
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#0B3D91' };
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="es-CL">
+      <body className={font.className}>
+        <main className="mx-auto min-h-dvh max-w-3xl pb-[4.5rem]">{children}</main>
+        <BottomNav />
+      </body>
+    </html>
+  );
+}
+
+
+===== app/globals.css =====
+
+@import "tailwindcss";
+
+body { background: #F5F6F8; color: #14213D; font-size: 18px; line-height: 1.55; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+
+===== app/page.tsx =====
+
+'use client';
+import Link from 'next/link';
+import { Clapperboard, Compass, FileText, ShieldCheck } from 'lucide-react';
+import ListenButton from '@/components/ListenButton';
+
+const SUMMARY =
+  'Bienvenido a CiudadanÃ­a Clara. AquÃ­ puedes verificar afirmaciones, ver noticias breves con fuentes oficiales, explorar casos y preguntar sobre documentos pÃºblicos. Esta herramienta apoya tu evaluaciÃ³n y no reemplaza tu criterio.';
+
+const CARDS = [
+  { href: '/verificar', label: 'Verificar afirmaciÃ³n', Icon: ShieldCheck, tone: 'bg-[#0B3D91] text-white' },
+  { href: '/reels', label: 'Reels verificados', Icon: Clapperboard, tone: 'bg-white text-[#14213D] border-2 border-[#0B3D91]' },
+  { href: '/explorar', label: 'Explorar casos', Icon: Compass, tone: 'bg-white text-[#14213D] border-2 border-[#0B3D91]' },
+  { href: '/documentos', label: 'Asistente de documentos pÃºblicos', Icon: FileText, tone: 'bg-[#0B3D91] text-white' },
+];
+
+export default function Home() {
+  return (
+    <div className="px-5 pt-8">
+      <header>
+        <h1 className="text-4xl font-bold leading-tight">CiudadanÃ­a Clara</h1>
+        <p className="mt-2 text-xl text-slate-700">Verifica, entiende y aprende con fuentes claras</p>
+      </header>
+
+      <ListenButton text={SUMMARY} id="home" label="Escuchar resumen por voz" className="mt-6 w-full" />
+
+      <ul className="mt-6 grid grid-cols-2 gap-4">
+        {CARDS.map(({ href, label, Icon, tone }) => (
+          <li key={href}>
+            <Link href={href} className={`flex aspect-square flex-col justify-between rounded-3xl p-4 text-lg font-bold leading-snug focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#C8102E] ${tone}`}>
+              <Icon className="h-10 w-10" aria-hidden />
+              {label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      <aside className="mt-8 rounded-2xl border-l-8 border-[#C8102E] bg-white p-4 text-base">
+        <strong>IA responsable.</strong> Esta herramienta apoya la evaluaciÃ³n de informaciÃ³n. No reemplaza el criterio humano ni emite veredictos absolutos.
+      </aside>
+    </div>
+  );
+}
+
+
+===== app/verificar/resultado/page.tsx =====
+
+'use client';
+import { Suspense } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { ExternalLink } from 'lucide-react';
+import ListenButton from '@/components/ListenButton';
+import VerdictBadge from '@/components/VerdictBadge';
+import { findVerification } from '@/data/mockData';
+import type { SourceRelation } from '@/types';
+
+const REL: Record<SourceRelation, string> = {
+  'A favor': 'bg-emerald-100 text-emerald-900',
+  'En contra': 'bg-red-100 text-red-900',
+  Contexto: 'bg-slate-200 text-slate-800',
+};
+
+function Resultado() {
+  const q = useSearchParams().get('q') ?? '';
+  const r = findVerification(q);
+  const audio = `AfirmaciÃ³n evaluada: ${r.claim}. Veredicto: ${r.verdict.replace('_', ' ')}. ${r.explanation.join(' ')} Limitaciones: ${r.limitations.join(' ')} Recuerda: la decisiÃ³n final es humana.`;
+
+  return (
+    <div className="px-5 pt-8">
+      <section className="rounded-2xl border-2 border-slate-300 bg-white p-4">
+        <h2 className="text-base font-bold text-slate-600">AfirmaciÃ³n evaluada</h2>
+        <p className="mt-1 text-xl">â€œ{r.claim || 'Sin texto'}â€</p>
+      </section>
+
+      <ListenButton text={audio} id="resultado" label="Escuchar anÃ¡lisis completo" className="mt-4 w-full" />
+
+      <div className="mt-5"><VerdictBadge verdict={r.verdict} large /></div>
+
+      <section className="mt-6">
+        <h2 className="text-2xl font-bold">ExplicaciÃ³n</h2>
+        <div className="mt-2 space-y-2 text-xl">{r.explanation.map((l, i) => <p key={i}>{l}</p>)}</div>
+      </section>
+
+      <section className="mt-6">
+        <h2 className="text-2xl font-bold">Fuentes oficiales</h2>
+        {r.sources.length === 0 && <p className="mt-2 text-lg text-slate-700">No encontramos fuentes oficiales para esta afirmaciÃ³n.</p>}
+        <ul className="mt-3 space-y-3">
+          {r.sources.map((s) => (
+            <li key={s.id} className="rounded-2xl border-2 border-slate-300 bg-white p-4">
+              <span className={`rounded-full px-3 py-1 text-sm font-bold ${REL[s.relation]}`}>{s.relation}</span>
+              <h3 className="mt-2 text-xl font-bold">{s.headline}</h3>
+              <p className="text-base text-slate-600">{s.institution}</p>
+              <blockquote className="mt-2 border-l-4 border-[#0B3D91] pl-3 text-lg italic">{s.excerpt}</blockquote>
+              <a href={s.url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-lg font-bold text-[#0B3D91] underline">
+                Ver fuente <ExternalLink className="h-5 w-5" aria-hidden />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="mt-6">
+        <h2 className="text-2xl font-bold">Limitaciones de la evidencia</h2>
+        <ul className="mt-2 list-disc space-y-1 pl-6 text-lg">{r.limitations.map((l, i) => <li key={i}>{l}</li>)}</ul>
+      </section>
+
+      <p role="note" className="mt-6 rounded-2xl bg-amber-100 p-4 text-lg font-bold text-amber-950">ðŸ’¡ Recuerda: La decisiÃ³n final es humana.</p>
+      <Link href="/verificar" className="mt-5 block min-h-14 rounded-2xl border-2 border-[#0B3D91] py-3 text-center text-xl font-bold text-[#0B3D91]">Verificar otra afirmaciÃ³n</Link>
+    </div>
+  );
+}
+
+export default function Page() {
+  return <Suspense fallback={<p className="p-6 text-xl">Cargandoâ€¦</p>}><Resultado /></Suspense>;
+}
+
+
+===== next.config.ts =====
+
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+  cacheComponents: true,
+  partialPrefetching: true,
+  turbopack: {
+    rules: {
+      "*.css": {
+        loaders: ["@tailwindcss/turbopack"],
+        as: "*.css",
+      },
+    },
+  },
+};
+
+export default nextConfig;
+
+
+===== package.json =====
+
+{
+  "name": "ciudadania-clara",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "lucide-react": "^1.70.0",
+    "next": "16.4.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.5",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
+

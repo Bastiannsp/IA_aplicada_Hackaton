@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es-CL">
       <body className={font.className}>
-        <main className="mx-auto min-h-dvh max-w-3xl pb-[4.5rem]">{children}</main>
+        <main className="mx-auto min-h-dvh max-w-3xl pb-28">{children}</main>
         <BottomNav />
       </body>
     </html>

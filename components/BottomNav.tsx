@@ -14,15 +14,23 @@ const TABS = [
 export default function BottomNav() {
   const path = usePathname();
   return (
-    <nav aria-label="Navegación principal" className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-300 bg-white pb-[env(safe-area-inset-bottom)]">
-      <ul className="mx-auto flex h-[4.5rem] max-w-3xl">
+    <nav
+      aria-label="Navegación principal"
+      className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+    >
+      <ul className="mx-auto flex h-[4.5rem] max-w-3xl items-stretch gap-1 rounded-3xl border border-slate-200 bg-white/95 p-1.5 shadow-[0_8px_30px_rgba(20,33,61,0.18)] backdrop-blur">
         {TABS.map(({ href, label, Icon }) => {
           const active = href === '/' ? path === '/' : path.startsWith(href);
           return (
             <li key={href} className="flex-1">
-              <Link href={href} aria-current={active ? 'page' : undefined}
-                className={`flex h-full flex-col items-center justify-center gap-1 text-xs font-bold ${active ? 'text-[#0B3D91]' : 'text-slate-600'}`}>
-                <span className={`rounded-full px-5 py-1 ${active ? 'bg-[#0B3D91]/10' : ''}`}><Icon className="h-6 w-6" aria-hidden /></span>
+              <Link
+                href={href}
+                aria-current={active ? 'page' : undefined}
+                className={`flex h-full flex-col items-center justify-center gap-0.5 rounded-2xl text-xs font-bold transition ${
+                  active ? 'bg-[#0B3D91] text-white' : 'text-slate-600'
+                }`}
+              >
+                <Icon className="h-6 w-6" aria-hidden />
                 {label}
               </Link>
             </li>
