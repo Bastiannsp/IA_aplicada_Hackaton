@@ -138,7 +138,7 @@ export default function AprenderPage() {
         )}
       </PageHeader>
 
-      <div className="px-5 pt-5">
+      <div className="mx-auto max-w-5xl px-5 pt-5 sm:px-8 lg:px-12">
         {!selected && (
           <ul className="space-y-4">
             {lessons.map((l, i) => {

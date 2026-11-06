@@ -23,7 +23,7 @@ export default function ResultadoPage() {
     return (
       <div>
         <PageHeader title="Resultado" subtitle="No hay un análisis disponible en esta sesión" Icon={ShieldCheck} />
-        <div className="space-y-4 px-5 pt-5">
+        <div className="mx-auto max-w-4xl space-y-4 px-5 pt-5 sm:px-8 lg:px-12">
           <p className={CARD}>Envía una afirmación desde el formulario para iniciar una verificación.</p>
           <Link href="/verificar" className="flex min-h-14 items-center justify-center rounded-full bg-[#0B3D91] text-xl font-bold text-white">
             Verificar una afirmación
@@ -34,6 +34,7 @@ export default function ResultadoPage() {
   }
 
   const verdict: Verdict = result.verdict === 'ENGANOSA' ? 'ENGAÑOSA' : result.verdict;
+  const hasReviewedEvidence = result.sources.length > 0;
   const explanation = [result.summary, result.reasoning].filter(Boolean);
   const audio = `Afirmación evaluada: ${result.claim}. Veredicto: ${verdict.replace('_', ' ')}. ${explanation.join(' ')} Limitaciones: ${result.limitations.join(' ')} Recuerda: la decisión final es humana.`;
 
@@ -41,10 +42,20 @@ export default function ResultadoPage() {
     <div>
       <PageHeader title="Resultado" subtitle="Evaluación basada en extractos revisados" Icon={ShieldCheck} />
 
-      <div className="space-y-6 px-5 pt-5">
+      <div className="mx-auto max-w-5xl space-y-6 px-5 pt-5 sm:px-8 lg:px-12">
         <section className={CARD}>
           <h2 className="text-base font-bold text-slate-600">Afirmación evaluada</h2>
           <p className="mt-1 text-xl">“{result.claim || 'Sin texto'}”</p>
+        </section>
+
+        <section
+          aria-live="polite"
+          className={`rounded-2xl border-2 p-4 ${hasReviewedEvidence ? 'border-emerald-600 bg-emerald-50 text-emerald-950' : 'border-slate-400 bg-slate-100 text-slate-800'}`}
+        >
+          <h2 className="text-base font-bold">Estado de las fuentes</h2>
+          <p className="mt-1 text-lg font-bold">
+            {hasReviewedEvidence ? 'Verificable: encontramos evidencia oficial revisada.' : 'No verificable: no encontramos información oficial suficiente.'}
+          </p>
         </section>
 
         <ListenButton text={audio} id="resultado" label="Escuchar análisis completo" className="w-full" />
@@ -90,7 +101,7 @@ export default function ResultadoPage() {
                     rel="noopener noreferrer"
                     className="mt-3 inline-flex min-h-14 items-center gap-1 text-lg font-bold text-[#0B3D91] underline"
                   >
-                    Abrir fuente oficial <ExternalLink className="h-5 w-5" aria-hidden />
+                    Ver fuente <ExternalLink className="h-5 w-5" aria-hidden />
                   </a>
                 </li>
               );

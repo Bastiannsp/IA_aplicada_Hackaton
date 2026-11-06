@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es-CL">
       <body className={font.className}>
         <VerificationProvider>
-          <main className="mx-auto min-h-dvh max-w-3xl pb-28">{children}</main>
+          <main className="mx-auto min-h-dvh w-full max-w-6xl pb-28">{children}</main>
           <BottomNav />
         </VerificationProvider>
       </body>

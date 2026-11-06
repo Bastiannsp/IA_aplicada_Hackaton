@@ -22,7 +22,12 @@ export default function Home() {
     <div>
       <PageHeader title="Ciudadanía Clara" subtitle="Verifica, entiende y aprende con fuentes claras" />
 
-      <div className="space-y-4 px-5 pt-5">
+      <div className="mx-auto max-w-5xl space-y-4 px-5 pt-5 sm:px-8 lg:px-12">
+        <aside className="rounded-2xl border border-[#C8102E]/40 bg-red-50 px-3 py-2 text-sm leading-snug text-red-950 shadow-sm">
+          <strong className="text-[#C8102E]">Uso responsable de Clara.</strong> Clara apoya la evaluación de
+          información, pero no reemplaza el criterio humano ni emite veredictos absolutos.
+        </aside>
+
         <ListenButton text={SUMMARY} id="home" label="Escuchar resumen por voz" className="w-full" />
 
         <Link
@@ -39,7 +44,7 @@ export default function Home() {
           <ChevronRight className="h-7 w-7 shrink-0" aria-hidden />
         </Link>
 
-        <ul className="grid grid-cols-2 gap-4">
+        <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {CARDS.map(({ href, label, desc, Icon, tone }) => (
             <li key={href}>
               <Link
@@ -58,10 +63,6 @@ export default function Home() {
           ))}
         </ul>
 
-        <aside className="rounded-3xl border border-slate-200 bg-white p-4 text-base shadow-md">
-          <strong className="text-[#C8102E]">IA responsable.</strong> Esta herramienta apoya la evaluación de
-          información. No reemplaza el criterio humano ni emite veredictos absolutos.
-        </aside>
       </div>
     </div>
   );

@@ -1,8 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Mic, Search } from 'lucide-react';
-import { useVoice } from '@/hooks/useVoice';
+import { Loader2, Search } from 'lucide-react';
 import { useVerification } from '@/components/VerificationProvider';
 
 type Phase = 'form' | 'loading';
@@ -10,7 +9,6 @@ type Phase = 'form' | 'loading';
 export default function VerificarPage() {
   const router = useRouter();
   const { setResult } = useVerification();
-  const { listen, listening, sttSupported } = useVoice();
   const [claim, setClaim] = useState('');
   const [phase, setPhase] = useState<Phase>('form');
   const [error, setError] = useState('');
@@ -21,7 +19,7 @@ export default function VerificarPage() {
     setError('');
     setPhase('loading');
     try {
-      const response = await fetch('/api/verify', {
+      const response = await fetch('/api/verify/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ claim: normalizedClaim }),
@@ -53,17 +51,8 @@ export default function VerificarPage() {
     }
   };
 
-  if (phase === 'loading') {
-    return (
-      <div role="status" aria-live="polite" className="flex min-h-[70dvh] flex-col items-center justify-center gap-5 px-6 text-center">
-        <Loader2 className="h-14 w-14 animate-spin text-[#0B3D91]" aria-hidden />
-        <p className="text-2xl font-bold">Contrastando la afirmación con evidencia revisada...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="px-5 pt-8">
+    <div className="mx-auto max-w-4xl px-5 pt-8 sm:px-8 lg:px-12">
       <h1 className="text-3xl font-bold">Verificar afirmación</h1>
       <label htmlFor="claim" className="mt-4 block text-lg text-slate-700">¿Qué quieres comprobar?</label>
       <textarea
@@ -75,16 +64,12 @@ export default function VerificarPage() {
       {error && <p role="alert" className="mt-3 rounded-xl bg-red-100 p-3 text-base font-semibold text-red-900">{error}</p>}
 
       <div className="mt-5 flex flex-col gap-3">
-        <button onClick={submit} disabled={!claim.trim()}
+        <button type="button" onClick={submit} disabled={!claim.trim() || phase === 'loading'}
           className="flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-[#0B3D91] px-5 text-xl font-bold text-white disabled:bg-slate-400">
-          <Search className="h-6 w-6" aria-hidden /> Comprobar con IA
+          {phase === 'loading' ? <Loader2 className="h-6 w-6 animate-spin" aria-hidden /> : <Search className="h-6 w-6" aria-hidden />}
+          {phase === 'loading' ? 'Clara está verificando...' : 'Comprobar con Clara'}
         </button>
-        {sttSupported && (
-          <button onClick={() => listen((t) => setClaim((c) => (c ? c + ' ' : '') + t))} aria-pressed={listening}
-            className={`flex min-h-14 items-center justify-center gap-2 rounded-2xl border-2 px-5 text-xl font-bold ${listening ? 'border-[#C8102E] bg-[#C8102E] text-white' : 'border-[#0B3D91] bg-white text-[#0B3D91]'}`}>
-            <Mic className="h-6 w-6" aria-hidden /> {listening ? 'Escuchando… toca para parar' : '🎙️ Dictar afirmación'}
-          </button>
-        )}
+        {phase === 'loading' && <p role="status" aria-live="polite" className="text-center text-base font-bold text-[#0B3D91]">Contrastando la afirmación con fuentes revisadas...</p>}
       </div>
     </div>
   );

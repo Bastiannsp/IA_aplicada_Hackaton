@@ -1,17 +1,22 @@
 'use client';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+const subscribeToBrowser = () => () => {};
+const browserSnapshot = () => typeof window !== 'undefined';
+const serverSnapshot = () => false;
+const FEMALE_VOICE_HINTS = ['sabina', 'helena', 'paulina', 'laura', 'mónica', 'monica', 'sofia', 'sofía', 'elena', 'isabela', 'female', 'mujer'];
+
 export function useVoice(lang = 'es-CL') {
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [listening, setListening] = useState(false);
-  const [ttsSupported, setTtsSupported] = useState(false);
-  const [sttSupported, setSttSupported] = useState(false);
+  const [voiceError, setVoiceError] = useState('');
+  const browserAvailable = useSyncExternalStore(subscribeToBrowser, browserSnapshot, serverSnapshot);
+  const ttsSupported = browserAvailable && 'speechSynthesis' in window;
+  const sttSupported = browserAvailable && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
   const recRef = useRef<any>(null);
 
   useEffect(() => {
-    setTtsSupported('speechSynthesis' in window);
-    setSttSupported('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
     return () => {
       window.speechSynthesis?.cancel();
       recRef.current?.abort?.();
@@ -29,9 +34,11 @@ export function useVoice(lang = 'es-CL') {
       window.speechSynthesis.cancel(); // evita cola de audios
       const u = new SpeechSynthesisUtterance(text);
       const voices = window.speechSynthesis.getVoices();
+      const spanishVoices = voices.filter((v) => v.lang.toLowerCase().startsWith('es'));
       const voice =
-        voices.find((v) => v.lang === 'es-CL') ||
-        voices.find((v) => v.lang.startsWith('es')) ||
+        spanishVoices.find((v) => FEMALE_VOICE_HINTS.some((hint) => v.name.toLowerCase().includes(hint))) ||
+        spanishVoices.find((v) => v.lang.toLowerCase() === 'es-cl') ||
+        spanishVoices[0] ||
         null;
       if (voice) u.voice = voice;
       u.lang = voice?.lang ?? lang;
@@ -53,24 +60,42 @@ export function useVoice(lang = 'es-CL') {
   const listen = useCallback(
     (onResult: (transcript: string) => void) => {
       const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (!SR) return;
+      setVoiceError('');
+      if (!SR) {
+        setVoiceError('Tu navegador no permite dictado por voz. Prueba con Chrome o Edge.');
+        return;
+      }
       if (listening) {
         recRef.current?.stop();
         return;
       }
       const rec = new SR();
-      rec.lang = lang;
+      rec.lang = lang === 'es-CL' ? 'es-ES' : lang;
       rec.interimResults = false;
       rec.maxAlternatives = 1;
       rec.onresult = (e: any) => onResult(e.results[0][0].transcript);
+      rec.onstart = () => setListening(true);
       rec.onend = () => setListening(false);
-      rec.onerror = () => setListening(false);
+      rec.onerror = (e: any) => {
+        setListening(false);
+        const messages: Record<string, string> = {
+          'not-allowed': 'Permite el acceso al micrófono en tu navegador para dictar.',
+          'service-not-allowed': 'El servicio de dictado no está permitido en este navegador.',
+          'no-speech': 'No detecté voz. Toca el botón e intenta hablar de nuevo.',
+          network: 'No se pudo conectar al servicio de dictado. Revisa tu conexión.',
+        };
+        setVoiceError(messages[e.error] ?? 'No se pudo iniciar el dictado. Intenta nuevamente.');
+      };
       recRef.current = rec;
-      setListening(true);
-      rec.start();
+      try {
+        rec.start();
+      } catch {
+        setListening(false);
+        setVoiceError('No se pudo iniciar el dictado. Revisa el permiso del micrófono e intenta nuevamente.');
+      }
     },
     [lang, listening],
   );
 
-  return { speak, stop, toggle, speakingId, isSpeaking: speakingId !== null, listen, listening, ttsSupported, sttSupported };
+  return { speak, stop, toggle, speakingId, isSpeaking: speakingId !== null, listen, listening, voiceError, ttsSupported, sttSupported };
 }

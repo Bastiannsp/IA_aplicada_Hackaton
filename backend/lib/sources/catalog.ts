@@ -37,8 +37,17 @@ export const VERIFICATION_SOURCE_CATALOG: readonly CuratedSource[] = [
     publisher: "Ministerio del Trabajo y Previsión Social",
     url: "https://www.mintrab.gob.cl/40horas-implementacion/",
     excerpt:
-      "2024: reducción de jornada ordinaria a 44 horas. … 2026: reducción de jornada ordinaria a 42 horas. … 2028: reducción de jornada ordinaria a 40 horas.",
-    keywords: ["40 horas", "jornada", "laboral", "semanales", "gradual", "2024", "2026", "2028", "Ley 21.561"],
+      "La Ley 21.561 está vigente y se aplica gradualmente: en 2024 la jornada ordinaria bajó a 44 horas, desde el 26 de abril de 2026 bajó a 42 horas y en 2028 llegará a 40 horas semanales.",
+    keywords: ["40 horas", "jornada", "laboral", "semanales", "gradual", "vigente", "rige", "2024", "2026", "42", "2028", "Ley 21.561"],
+  },
+  {
+    id: "dt-dictamenes-ley-40-horas",
+    title: "Dictámenes sobre la Ley 21.561",
+    publisher: "Dirección del Trabajo",
+    url: "https://www.dt.gob.cl/portal/1626/w3-propertyname-2556.html",
+    excerpt:
+      "La Dirección del Trabajo publica dictámenes sobre la Ley 21.561, que modifica el Código del Trabajo para reducir gradualmente la jornada laboral.",
+    keywords: ["40 horas", "ley", "21.561", "jornada", "trabajo", "dictámenes", "vigente", "reducción"],
   },
   {
     id: "ine-censo-2024-resultados",
@@ -69,7 +78,7 @@ function tokenize(value: string): string[] {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .match(/[a-z0-9]+/g)
-    ?.filter((word) => word.length > 2 && !STOP_WORDS.has(word)) ?? [];
+    ?.filter((word) => (word.length > 2 || /^\d{2,4}$/.test(word)) && !STOP_WORDS.has(word)) ?? [];
 }
 
 /** Accept only auditable public HTTPS URLs from the trusted, code-reviewed catalog. */

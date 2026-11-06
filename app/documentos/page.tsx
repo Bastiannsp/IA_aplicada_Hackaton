@@ -33,7 +33,7 @@ export default function DocumentosPage() {
 
   useEffect(() => {
     let active = true;
-    fetch('/api/documents', { cache: 'no-store' })
+    fetch('/api/documents/', { cache: 'no-store' })
       .then(async (response) => {
         if (!response.ok) throw new Error('No fue posible cargar los documentos.');
         return response.json() as Promise<PublicDocument[]>;
@@ -60,7 +60,7 @@ export default function DocumentosPage() {
     setResult(null);
 
     try {
-      const response = await fetch('/api/civic/ask', {
+      const response = await fetch('/api/civic/ask/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ documentId: docId, question: question.trim() }),
@@ -83,7 +83,7 @@ export default function DocumentosPage() {
   const selectedDocument = documents.find((document) => document.id === docId);
 
   return (
-    <div className="px-5 pt-8">
+    <div className="mx-auto max-w-4xl px-5 pt-8 sm:px-8 lg:px-12">
       <h1 className="text-3xl font-bold">Asistente de documentos</h1>
 
       <label htmlFor="doc" className="mt-4 block text-lg text-slate-700">Documento</label>

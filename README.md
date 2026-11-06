@@ -1,36 +1,71 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# Ciudadanía Clara
 
-First, run the development server:
+Ciudadanía Clara es una aplicación web responsive para comprender y verificar información pública de Chile. Permite consultar afirmaciones, revisar evidencia oficial, explorar temas ciudadanos y aprender a reconocer información engañosa.
+
+## Funcionalidades
+
+- Verificación de afirmaciones con fuentes oficiales chilenas.
+- Resultados con estado `Respaldada`, `Contradicha`, `Engañosa` o `No verificable`.
+- Enlaces directos a las fuentes mediante el botón **Ver fuente**.
+- Explorar tendencias sobre elecciones, leyes laborales y economía chilena.
+- Reels educativos con fuentes oficiales.
+- Lecciones breves sobre evidencia y desinformación.
+- Asistente para consultar extractos de documentos públicos.
+- Interfaz adaptable a móvil, tablet y escritorio.
+
+## Ejecutar localmente
+
+Requisitos: Node.js y npm.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La aplicación estará disponible en [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Para validar el proyecto:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+```
 
-## Learn More
+## API de verificación
 
-To learn more about Next.js, take a look at the following resources:
+La ruta principal es:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```text
+POST /api/verify/
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Recibe una afirmación:
 
-## Deploy on Vercel
+```json
+{
+	"claim": "La Ley de 40 Horas está vigente en Chile"
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+La aplicación usa un catálogo de evidencia oficial revisada. Las fuentes se limitan a dominios institucionales y cada resultado incluye un enlace para consultar la fuente original.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+OpenRouter es opcional para ampliar el análisis. Si se configura, las variables deben estar en `.env.local` en la raíz del proyecto:
+
+```env
+OPENROUTER_API_KEY=tu_token
+OPENROUTER_MODEL=deepseek/deepseek-chat
+```
+
+No subir `.env.local` ni tokens al repositorio.
+
+## Alcance actual
+
+El proyecto está preparado como sitio web responsive. La información de demostración se enfoca en Chile y las fuentes deben mantenerse actualizadas y revisadas antes de usar la aplicación en producción.
+
+El reconocimiento de voz para dictar afirmaciones no se incluye en la pantalla Verificar porque depende de servicios variables del navegador. La lectura por voz de Clara y el dictado del asistente de documentos siguen disponibles cuando el navegador los admite. Para una futura APK se recomienda integrar reconocimiento nativo de Android.
+
+## Despliegue
+
+Puede desplegarse como aplicación Next.js en servicios como Vercel. Las variables de entorno deben configurarse en el panel del servicio y nunca publicarse en Git.

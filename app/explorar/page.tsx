@@ -1,10 +1,11 @@
 'use client';
-import { useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, Bookmark, Check, ChevronRight, Compass, FileText, Heart, Landmark, MessageCircle, MoreHorizontal, Newspaper, Repeat2, Search, Share, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Bookmark, Check, ChevronRight, Compass, ExternalLink, FileText, Heart, Landmark, Loader2, MessageCircle, MoreHorizontal, Newspaper, Repeat2, Search, Share, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useVerification } from '@/components/VerificationProvider';
 import PageHeader from '@/components/PageHeader';
-import { cases } from '@/data/mockData';
+import { cases, verifications } from '@/data/mockData';
 import type { CaseItem, PriorVote } from '@/types';
 
 const TYPE_ICON: Record<CaseItem['type'], LucideIcon> = {
@@ -30,17 +31,64 @@ type ExploreTab = (typeof TABS)[number];
 
 const CARD = 'border-b border-slate-200 bg-white px-5 py-4';
 
+const CHILE_TRENDS = [
+  {
+    category: 'Elecciones y candidaturas',
+    title: 'Candidaturas en Chile',
+    summary: 'Revisa candidaturas, pactos y resultados publicados por el Servel.',
+    source: 'Servicio Electoral de Chile',
+    url: 'https://www.servel.cl/',
+    tone: 'bg-[#0B3D91]/10 text-[#0B3D91]',
+  },
+  {
+    category: 'Trabajo y legislación',
+    title: 'Decretos y leyes laborales',
+    summary: 'Consulta cambios de jornada, derechos laborales y textos legales vigentes.',
+    source: 'Dirección del Trabajo y BCN',
+    url: 'https://www.dt.gob.cl/',
+    tone: 'bg-[#C8102E]/10 text-[#C8102E]',
+  },
+  {
+    category: 'Economía de Chile',
+    title: 'Noticias del Banco Central',
+    summary: 'Sigue comunicados, decisiones y datos oficiales sobre la economía chilena.',
+    source: 'Banco Central de Chile',
+    url: 'https://www.bcentral.cl/',
+    tone: 'bg-emerald-100 text-emerald-800',
+  },
+] as const;
+
 export default function ExplorarPage() {
+  const router = useRouter();
+  const { setResult } = useVerification();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [vote, setVote] = useState<PriorVote | null>(null);
   const [query, setQuery] = useState('');
+  const [inputQuery, setInputQuery] = useState('');
   const [activeTab, setActiveTab] = useState<ExploreTab>('Para ti');
+  const [isFiltering, setIsFiltering] = useState(false);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selected = cases.find((c) => c.id === selectedId) ?? null;
+  const selectedSource = selected ? verifications.find((verification) => verification.id === selected.resultId)?.sources[0] : null;
   const visibleCases = cases.filter((c) => {
     const matchesQuery = `${c.title} ${c.type} ${c.headline}`.toLowerCase().includes(query.toLowerCase());
     const matchesTab = activeTab === 'Noticias' ? c.type === 'Noticia' : true;
     return matchesQuery && matchesTab;
   });
+
+  useEffect(() => () => {
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+  }, []);
+
+  function search(value: string) {
+    setInputQuery(value);
+    setIsFiltering(true);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => {
+      setQuery(value);
+      setIsFiltering(false);
+    }, 250);
+  }
 
   function open(id: string) {
     setSelectedId(id);
@@ -54,6 +102,30 @@ export default function ExplorarPage() {
     window.scrollTo(0, 0);
   }
 
+  function showEvidence() {
+    if (!selected) return;
+    const verification = verifications.find((item) => item.id === selected.resultId);
+    if (!verification) return;
+
+    setResult({
+      claim: selected.headline,
+      verdict: verification.verdict === 'ENGAÑOSA' ? 'ENGANOSA' : verification.verdict,
+      summary: verification.explanation[0],
+      reasoning: verification.explanation.slice(1).join(' '),
+      sources: verification.sources.map((source) => ({
+        id: source.id,
+        title: source.headline,
+        url: source.url,
+        publisher: source.institution,
+        evidence: source.excerpt,
+        supports: source.relation === 'A favor' ? 'A_FAVOR' : source.relation === 'En contra' ? 'EN_CONTRA' : 'CONTEXTO',
+      })),
+      limitations: verification.limitations,
+      human_review: true,
+    });
+    router.push('/verificar/resultado/');
+  }
+
   return (
     <div>
       <PageHeader
@@ -62,18 +134,19 @@ export default function ExplorarPage() {
         Icon={Compass}
       />
 
-      <div className="overflow-hidden border-x border-slate-200 bg-white">
+      <div className="mx-auto w-full max-w-5xl overflow-hidden border-x border-slate-200 bg-white">
         {!selected && (
           <>
             <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur">
               <label htmlFor="explorar-busqueda" className="sr-only">Buscar en Explorar</label>
               <div className="flex items-center gap-3 rounded-full bg-[#F5F6F8] px-4 text-slate-500">
-                <Search className="h-5 w-5 shrink-0" aria-hidden />
+                {isFiltering ? <Loader2 className="h-5 w-5 shrink-0 animate-spin" aria-hidden /> : <Search className="h-5 w-5 shrink-0" aria-hidden />}
                 <input
                   id="explorar-busqueda"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
+                  value={inputQuery}
+                  onChange={(event) => search(event.target.value)}
                   placeholder="Buscar temas, leyes o noticias"
+                  aria-busy={isFiltering}
                   className="min-h-11 w-full bg-transparent text-base text-[#14213D] outline-none placeholder:text-slate-500"
                 />
               </div>
@@ -86,7 +159,7 @@ export default function ExplorarPage() {
                   type="button"
                   role="tab"
                   aria-selected={activeTab === tab}
-                  onClick={() => setActiveTab(tab)}
+                  onClick={() => { setActiveTab(tab); setInputQuery(''); setQuery(''); setIsFiltering(false); }}
                   className={`relative min-h-14 flex-1 px-2 text-base font-bold transition ${activeTab === tab ? 'text-[#0B3D91]' : 'text-slate-500'}`}
                 >
                   {tab}
@@ -95,26 +168,38 @@ export default function ExplorarPage() {
               ))}
             </div>
 
-            <section className="border-b border-slate-200 bg-[#F5F6F8] px-5 py-4">
-              <p className="text-sm font-bold uppercase tracking-wide text-slate-500">Tendencias para ti</p>
-              <div className="mt-3 grid grid-cols-2 gap-x-5 gap-y-3">
-                {['#Ley40Horas', '#PGU', '#Presupuesto2026', '#FuentesOficiales'].map((topic, index) => (
-                  <button key={topic} type="button" onClick={() => setQuery(topic.slice(1))} className="text-left">
-                    <span className="block text-xs text-slate-500">Tendencia {index + 1}</span>
-                    <span className="block text-base font-bold text-[#14213D]">{topic}</span>
-                  </button>
-                ))}
+            {activeTab === 'En tendencia' && (
+              <section className="border-b border-slate-200 bg-[#F5F6F8] px-5 py-4">
+                <p className="text-sm font-bold uppercase tracking-wide text-slate-500">Tendencias de Chile</p>
+                <div className="mt-3 space-y-3">
+                  {CHILE_TRENDS.map((trend) => (
+                    <article key={trend.title} className="rounded-2xl border border-slate-200 bg-white p-4">
+                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${trend.tone}`}>{trend.category}</span>
+                      <h2 className="mt-2 text-lg font-bold">{trend.title}</h2>
+                      <p className="mt-1 text-sm leading-snug text-slate-700">{trend.summary}</p>
+                      <div className="mt-3 flex items-center justify-between gap-3">
+                        <span className="text-xs text-slate-500">Fuente: {trend.source}</span>
+                        <a href={trend.url} target="_blank" rel="noopener noreferrer" className="shrink-0 text-sm font-bold text-[#0B3D91] underline">
+                          Ver fuente
+                        </a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {activeTab !== 'En tendencia' && (
+              <div className="border-b border-slate-200 px-5 py-3">
+                <h2 className="text-lg font-bold">{activeTab === 'Noticias' ? 'Noticias para revisar' : 'Recomendado para ti'}</h2>
+                <p className="text-sm text-slate-600">{activeTab === 'Noticias' ? 'Información pública de Chile para leer con contexto.' : 'Casos seleccionados para informarte antes de compartir.'}</p>
               </div>
-            </section>
+            )}
 
-            <div className="border-b border-slate-200 px-5 py-3">
-              <h2 className="text-lg font-bold">En conversación</h2>
-              <p className="text-sm text-slate-600">Casos que conviene leer antes de compartir.</p>
-            </div>
-
-            <ul>
+            {activeTab !== 'En tendencia' && <ul>
             {visibleCases.map((c) => {
               const Icon = TYPE_ICON[c.type];
+              const source = verifications.find((verification) => verification.id === c.resultId)?.sources[0];
               return (
                 <li key={c.id}>
                   <button
@@ -135,11 +220,20 @@ export default function ExplorarPage() {
                     </span>
                     <MoreHorizontal className="h-5 w-5 shrink-0 text-slate-500" aria-hidden />
                   </button>
+                  {source && (
+                    <div className="flex items-center justify-between gap-3 bg-white px-5 pb-3 text-xs text-slate-500">
+                      <span>Fuente: {source.institution}</span>
+                      <a href={source.url} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 items-center gap-1 text-sm font-bold text-[#0B3D91] underline">
+                        Ver fuente <ExternalLink className="h-4 w-4" aria-hidden />
+                      </a>
+                    </div>
+                  )}
                 </li>
               );
             })}
             </ul>
-            {visibleCases.length === 0 && <p className="px-5 py-10 text-center text-lg text-slate-600">No encontramos casos para “{query}”.</p>}
+            }
+            {activeTab !== 'En tendencia' && visibleCases.length === 0 && <p className="px-5 py-10 text-center text-lg text-slate-600">No encontramos casos para “{query}”.</p>}
           </>
         )}
 
@@ -162,6 +256,11 @@ export default function ExplorarPage() {
               <blockquote className="mt-1 rounded-2xl border-l-4 border-[#C8102E] bg-[#F5F6F8] p-3 text-xl italic">
                 “{selected.headline}”
               </blockquote>
+              {selectedSource && (
+                <a href={selectedSource.url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-base font-bold text-[#0B3D91] underline">
+                  Ver fuente: {selectedSource.institution} <ExternalLink className="h-5 w-5" aria-hidden />
+                </a>
+              )}
             </section>
 
             <section className={CARD}>
@@ -201,12 +300,13 @@ export default function ExplorarPage() {
               </p>
             </section>
 
-            <Link
-              href={`/verificar/resultado?q=${encodeURIComponent(selected.headline)}`}
+            <button
+              type="button"
+              onClick={showEvidence}
               className="flex min-h-14 items-center justify-center gap-2 rounded-full bg-[#C8102E] px-6 text-xl font-bold text-white shadow-md transition active:scale-[0.98]"
             >
               Ver Evidencia y Fuentes <ChevronRight className="h-6 w-6" aria-hidden />
-            </Link>
+            </button>
           </div>
         )}
       </div>

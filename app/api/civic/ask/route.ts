@@ -1,7 +1,7 @@
 import { documents } from '@/backend/lib/database/mockData';
 import type { CivicAskRequest, CivicAskResponse } from '@/backend/types/verification';
 
-const STOP_WORDS = new Set(['para', 'por', 'con', 'una', 'uno', 'que', 'como', 'desde', 'sobre', 'esta', 'este', 'las', 'los', 'del', 'con', 'sus', 'una', 'un', 'es', 'en', 'de', 'y', 'a']);
+const STOP_WORDS = new Set(['para', 'por', 'con', 'una', 'uno', 'que', 'como', 'desde', 'sobre', 'esta', 'este', 'las', 'los', 'del', 'sus', 'un', 'es', 'en', 'de', 'y', 'a']);
 
 function tokenize(value: string): Set<string> {
   return new Set(
